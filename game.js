@@ -4,6 +4,14 @@ let userClickedPattern = [];
 let level = 0;
 let started = false;
 
+$(document).keypress(function () {
+    if (!started) {
+        $('#level-title').text('Level ' + level);
+        nextSequence();
+        started = true;
+    }
+});
+
 function playSound(name) {
     let audio = new Audio('./sounds/' + name + '.mp3');
     audio.play();
@@ -17,36 +25,39 @@ function animatePress(currentColor) {
 }
 
 function checkAnswer(currentLevel) {
-    console.log('Current Level: ', currentLevel.length);
-    console.log('Game Pattern: ', gamePattern.length);
+    console.log('Current Level: ', currentLevel);
     if (
-        currentLevel[currentLevel.length - 1] ===
-        gamePattern[gamePattern.length - 1]
+        userClickedPattern[currentLevel] === gamePattern[currentLevel]
     ) {
         console.log('Success!');
+
+        if (userClickedPattern.length === gamePattern.length) {
+            setTimeout(function () {
+                nextSequence();
+            }, 1000);
+        }
     } else {
         console.log('Wrong!');
     }
 }
 
 $('.btn').click(function () {
-    nextSequence();
     let userChosenColor = $(this).attr('id');
+    userClickedPattern.push(userChosenColor);
+
     playSound(userChosenColor);
     animatePress(userChosenColor);
-    userClickedPattern.push(userChosenColor);
-    checkAnswer(userClickedPattern);
+    checkAnswer(userClickedPattern.length - 1);
 });
 
 function nextSequence() {
-    console.log('Next Sequence Fired');
+    userClickedPattern = [];
     level++;
     $('#level-title').text('Level ' + level);
 
     let randomNumber = Math.floor(Math.random() * 4);
     let randomChosenColor = buttonColors[randomNumber];
     gamePattern.push(randomChosenColor);
-    console.log('next sequence game pattern: ', gamePattern);
     $('#' + randomChosenColor)
         .fadeIn(100)
         .fadeOut(100)
@@ -54,11 +65,3 @@ function nextSequence() {
 
     playSound(randomChosenColor);
 }
-
-$(document).keypress(function () {
-    if (!started) {
-        $('#level-title').text('Level ' + level);
-        nextSequence();
-        started = true;
-    }
-});
